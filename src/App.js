@@ -32,13 +32,16 @@ const App = memo(function App(props) {
     if (files.length > 0 && files[0].type === "text/plain") {
       const file = files[0];
       setErrorValues("file", '')
-      const reader = new FileReader()
-      reader.onload = async (e) => {
-        let text = e.target.result
-        text = text.split(/\r?\n/);
-        setFileData(text);
+      var formData = new FormData();
+      formData.append('file', file);
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'http://localhost:8000', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          setFileData(JSON.parse(xhr.response));
+        }
       }
-      reader.readAsText(file)
+      xhr.send(formData);
     } else {
       setErrorValues('file', 'Invalid file');
     }
@@ -58,6 +61,7 @@ const App = memo(function App(props) {
     setValues(v => ({ ...v, [name]: value }))
   }
 
+  console.log("fileData", fileData)
   const getTableData = () => {
     let newData = [...fileData];
     newData.length = values.lines || 0;
